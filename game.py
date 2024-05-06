@@ -2,12 +2,15 @@
 from __future__ import annotations
 import numpy as np
 import pyspiel
+import copy
 
 class Game:
     open_spiel_game = pyspiel.load_game("2048")
     
     def __init__(self) -> None:
         self.state = Game.open_spiel_game.new_initial_state()
+        # Using this RNG makes the game deterministic. That is, the chance node will behave the same in every playthrough.
+        self.rng = np.random.default_rng(13)
         # 2048 starts with two chance nodes, so that 2 numbers '2' are placed in the grid.
         self.__execute_chance_node()
         self.__execute_chance_node()
@@ -16,7 +19,7 @@ class Game:
         assert(self.state.is_chance_node())
         outcomes = self.state.chance_outcomes()
         action_list, prob_list = zip(*outcomes)
-        action = np.random.choice(action_list, p=prob_list)
+        action = self.rng.choice(action_list, p=prob_list)
         self.state.apply_action(action)
 
     def actions(self):
@@ -24,6 +27,8 @@ class Game:
 
     def copyFrom(self, game: Game):
         self.state = Game.open_spiel_game.deserialize_state(game.state.serialize())
+        # Copy the RNG as it is in this current state.
+        self.rng.bit_generator.state = game.rng.bit_generator.state
     
     def won(self):
         if not self.state.is_terminal():
