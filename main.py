@@ -47,23 +47,24 @@ class Game:
         # Now we let the chance node do its thing.
         self.__execute_chance_node()
 
-        return self.state.is_terminal(), self.state.returns()[0]
+        return self.state.is_terminal(), self.state.rewards()[0]
 
 def main(_):
     np.random.seed(13)
 
     for _ in range(0, 100):
         game = Game()
-        reward = 0
+        total_reward = 0
         while True:
             actions = game.actions()
             action = np.random.choice(actions)
             done, reward = game.step(action)
+            total_reward += reward
             if done:
                 break
 
         # Game is now done. Print utilities for player 1.
-        print(f'{reward}', end=' ')
+        print(f'{total_reward}', end=' ')
         # print(str(state))
 
 if __name__ == "__main__":
