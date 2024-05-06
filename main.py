@@ -1,19 +1,6 @@
-# Copyright 2019 DeepMind Technologies Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 """Python spiel example."""
-
+# This is required for type annotation to work for this line: def copyFrom(game: Game):
+from __future__ import annotations
 import random
 from absl import app
 from absl import flags
@@ -22,68 +9,62 @@ import numpy as np
 from open_spiel.python import games  # pylint: disable=unused-import
 import pyspiel
 
-FLAGS = flags.FLAGS
+class Game:
+    open_spiel_game = pyspiel.load_game("2048")
+    
+    def __init__(self) -> None:
+        self.state = Game.open_spiel_game.new_initial_state()
+        # 2048 starts with two chance nodes, so that 2 numbers '2' are placed in the grid.
+        self.__execute_chance_node()
+        self.__execute_chance_node()
 
-# Game strings can just contain the name or the name followed by parameters
-# and arguments, e.g. "breakthrough(rows=6,columns=6)"
-flags.DEFINE_string("game_string", "2048", "Game string")
+    def __execute_chance_node(self):
+        assert(self.state.is_chance_node())
+        outcomes = self.state.chance_outcomes()
+        action_list, prob_list = zip(*outcomes)
+        action = np.random.choice(action_list, p=prob_list)
+        self.state.apply_action(action)
 
+    def actions(self):
+        return self.state.legal_actions(0)
+
+    def copyFrom(self, game: Game):
+        self.state = Game.open_spiel_game.deserialize_state(game.state.serialize())
+        
+    def step(self, action) -> tuple[bool, float]:
+        # Check if the game is done.
+        if self.state.is_terminal():
+            return True, self.state.returns()[0]
+        
+        # We are currently accepting an action from the player.
+        assert(not self.state.is_chance_node())
+        self.state.apply_action(action)
+
+        # Check if the game is done.
+        if self.state.is_terminal():
+            return True, self.state.returns()[0]
+
+        # Now we let the chance node do its thing.
+        self.__execute_chance_node()
+
+        return self.state.is_terminal(), self.state.returns()[0]
 
 def main(_):
-  games_list = pyspiel.registered_games()
-  print("Registered games:")
-  print(games_list)
+    np.random.seed(13)
 
-  action_string = None
+    for _ in range(0, 100):
+        game = Game()
+        reward = 0
+        while True:
+            actions = game.actions()
+            action = np.random.choice(actions)
+            done, reward = game.step(action)
+            if done:
+                break
 
-  print("Creating game: " + FLAGS.game_string)
-  game = pyspiel.load_game(FLAGS.game_string)
-
-  # Create the initial state
-  state = game.new_initial_state()
-
-  # Print the initial state
-  print(str(state))
-
-  while not state.is_terminal():
-    # The state can be three different types: chance node,
-    # simultaneous node, or decision node
-    if state.is_chance_node():
-      # Chance node: sample an outcome
-      outcomes = state.chance_outcomes()
-      num_actions = len(outcomes)
-      print("Chance node, got " + str(num_actions) + " outcomes")
-      action_list, prob_list = zip(*outcomes)
-      action = np.random.choice(action_list, p=prob_list)
-      print("Sampled outcome: ",
-            state.action_to_string(state.current_player(), action))
-      state.apply_action(action)
-    elif state.is_simultaneous_node():
-      # Simultaneous node: sample actions for all players.
-      random_choice = lambda a: np.random.choice(a) if a else [0]
-      chosen_actions = [
-          random_choice(state.legal_actions(pid))
-          for pid in range(game.num_players())
-      ]
-      print("Chosen actions: ", [
-          state.action_to_string(pid, action)
-          for pid, action in enumerate(chosen_actions)
-      ])
-      state.apply_actions(chosen_actions)
-    else:
-      # Decision node: sample action for the single current player
-      action = random.choice(state.legal_actions(state.current_player()))
-      action_string = state.action_to_string(state.current_player(), action)
-      print("Player ", state.current_player(), ", randomly sampled action: ",
-            action_string)
-      state.apply_action(action)
-    print(str(state))
-
-  # Game is now done. Print utilities for each player
-  returns = state.returns()
-  for pid in range(game.num_players()):
-    print("Utility for player {} is {}".format(pid, returns[pid]))
-
+        # Game is now done. Print utilities for player 1.
+        print(f'{reward}', end=' ')
+        # print(str(state))
 
 if __name__ == "__main__":
-  app.run(main)
+    app.run(main)
