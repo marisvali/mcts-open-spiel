@@ -1,4 +1,3 @@
-"""Python spiel example."""
 # This is required for type annotation to work for this line: def copyFrom(game: Game):
 from __future__ import annotations
 import random
