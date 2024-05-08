@@ -18,6 +18,8 @@ def Policy_Player_MCTS(mytree):
     # that starts from the node rooted at the choosen action.
     # The next search, hence, will not start from scratch but will already have collected information and statistics
     # about the nodes, so we can reuse such statistics to make the search even more reliable!
-    next_tree.detach_parent()
+    # next_tree.detach_parent()
+    # I don't detach the parent because I want to visualize the entire graph.
+
     
     return next_tree, next_action

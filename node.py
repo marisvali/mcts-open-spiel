@@ -25,6 +25,9 @@ class Node:
                 
         # the environment
         self.game = game
+
+        # description
+        self.desc = str(self.game.state)
         
         # if game is won/loss/draw
         self.done = done
