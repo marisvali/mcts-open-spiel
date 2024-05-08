@@ -15,7 +15,7 @@ class Node:
     def __init__(self, game: Game, done, parent, action_index):
           
         # child nodes
-        self.child = None
+        self.children = None
         
         # total rewards from MCTS exploration
         self.T = 0
@@ -38,6 +38,8 @@ class Node:
         # action index that leads to this node
         self.action_index = action_index
         
+    def label(self):
+        return f'{self.T:.0f}\n{self.N:.0f}\n{self.getUCBscore():.0f}\n{self.desc}'
         
     def getUCBscore(self):
         
@@ -87,7 +89,7 @@ class Node:
             done, _ = game.step(action)
             child[action] = Node(game, done, self, action)                        
 
-        self.child = child
+        self.children = child
                 
             
     def explore(self):
@@ -105,9 +107,9 @@ class Node:
         
         current = self
 
-        while current.child:
+        while current.children:
 
-            child = current.child
+            child = current.children
             max_U = max(c.getUCBscore() for c in child.values())
             actions = [ a for a,c in child.items() if c.getUCBscore() == max_U ]
             if len(actions) == 0:
@@ -121,8 +123,8 @@ class Node:
             current.T = current.T + current.rollout()
         else:
             current.create_child()
-            if current.child:
-                current = random.choice(list(current.child.values()))
+            if current.children:
+                current = random.choice(list(current.children.values()))
             current.T = current.T + current.rollout()
             
         current.N += 1      
@@ -180,10 +182,10 @@ class Node:
         if self.done:
             raise ValueError("game has ended")
 
-        if not self.child:
+        if not self.children:
             raise ValueError('no children found and game hasn\'t ended')
         
-        child = self.child
+        child = self.children
         
         max_N = max(node.N for node in child.values())
        

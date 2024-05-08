@@ -7,9 +7,9 @@ def TreeSize(node: Node):
     while len(nodes) > 0:
         num_nodes += 1
         current = nodes.pop(0)
-        if current.child:
-            for action in current.child:
-                child = current.child[action]
+        if current.children:
+            for action in current.children:
+                child = current.children[action]
                 nodes.append(child)
 
     return num_nodes
@@ -28,11 +28,11 @@ def PrintNode(node: Node):
     node_idx += 1
     while len(nodes) > 0:
         current, current_idx = nodes.pop(0)
-        if current.child:
-            for action in current.child:
-                child = current.child[action]
+        if current.children:
+            for action in current.children:
+                child = current.children[action]
                 nodes.append((child, node_idx))
-                net.add_node(node_idx, label=f'{child.T:.0f}\n{child.N:.0f}\n{child.getUCBscore():.0f}\n{child.desc}')
+                net.add_node(node_idx, label=child.label())
                 net.add_edge(current_idx, node_idx, label=str(action))
                 node_idx += 1
 

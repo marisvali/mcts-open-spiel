@@ -53,3 +53,6 @@ class Game:
         self.__execute_chance_node()
 
         return self.state.is_terminal(), self.state.rewards()[0]
+    
+    def total_reward(self):
+        return self.state.returns()[0]
