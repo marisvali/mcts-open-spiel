@@ -71,7 +71,7 @@ class NaiveNode:
         total1 += duration
 
         if idx % 1000 == 0:
-            print("--- %s seconds ---" % (total1))
+            # print("--- %s seconds ---" % (total1))
             total1 = 0
 
         start_time = time.time()
@@ -80,8 +80,22 @@ class NaiveNode:
         duration = time.time() - start_time
         total2 += duration
         if idx % 1000 == 0:
-            print("--- %s seconds ---" % (total2))
+            # print("--- %s seconds ---" % (total2))
             total2 = 0
+
+    def explore_breadth_first(self, num_new_nodes: int):
+        nodes = [self]
+        idx_new_nodes = 0
+        while len(nodes) > 0 and idx_new_nodes < num_new_nodes:
+            node = nodes.pop(0)
+            if not node.children:
+                node.create_child()
+                if node.children:
+                    idx_new_nodes += len(node.children)
+            
+            if node.children:
+                for child in node.children.values():
+                    nodes.append(child)
     
     def next(self):
         # find the leaf with max reward

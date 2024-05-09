@@ -1,4 +1,4 @@
-MCTS_POLICY_EXPLORE = 100 # MCTS exploring constant: the higher, the more reliable, but slower in execution time
+MCTS_POLICY_EXPLORE = 8 # MCTS exploring constant: the higher, the more reliable, but slower in execution time
 
 def Policy_Player_MCTS(mytree):  
 

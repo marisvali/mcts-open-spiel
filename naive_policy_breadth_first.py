@@ -1,8 +1,7 @@
-NAIVE_POLICY_EXPLORE = 25 # naive exploring constant: the higher, the more reliable, but slower in execution time
+NAIVE_POLICY_EXPLORE = 20 # naive exploring constant: the higher, the more reliable, but slower in execution time
 
-def Policy_Player_Naive(mytree):
-    for i in range(NAIVE_POLICY_EXPLORE):
-        mytree.explore()
+def Policy_Player_Naive_Breadth_First(mytree):
+    mytree.explore_breadth_first(NAIVE_POLICY_EXPLORE)
     
     next_tree, next_action = mytree.next()
         

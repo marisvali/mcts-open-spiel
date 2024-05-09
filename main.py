@@ -10,6 +10,7 @@ from visualize import *
 from utils import *
 from naive_node import *
 from naive_policy import *
+from naive_policy_breadth_first import *
 
 def mcts():
     np.random.seed(19)
@@ -21,23 +22,24 @@ def mcts():
     original = mytree
     # PrintNode(original)
     step_idx = 0
-    print(TreeSize(original), TreeSize(mytree))
-    write_to_csv([step_idx, TreeSize(original), TreeSize(mytree)], True)
+    # print(TreeSize(original), TreeSize(mytree))
+    # write_to_csv([step_idx, TreeSize(original), TreeSize(mytree)], True)
     while True:
         step_idx += 1
+        print('#', end='')
         # actions = game.actions()
         # action = np.random.choice(actions)
         mytree, action = Policy_Player_MCTS(mytree)
         # PrintNode(original)
-        total_tree_size = TreeSize(original)
-        current_tree_size = TreeSize(mytree)
-        print(total_tree_size, current_tree_size)
-        write_to_csv([step_idx, total_tree_size, current_tree_size], False)
+        # total_tree_size = TreeSize(original)
+        # current_tree_size = TreeSize(mytree)
+        # print(total_tree_size, current_tree_size)
+        # write_to_csv([step_idx, total_tree_size, current_tree_size], False)
         done, reward = game.step(action)
         total_reward += reward
         # print('#', end='')
-        print(step_idx)
-        print(game.state)
+        # print(step_idx)
+        # print(game.state)
         if done:
             break
 
@@ -45,8 +47,10 @@ def mcts():
     # print(f'{total_reward}', end=' ')
     if game.won():
         print("WINNER!")
+    else:
+        print("LOSER!")
     rewards.append(total_reward)
-    # print(str(state))
+    print(str(game.state))
     print(max(rewards))
 
 def naive():
@@ -60,21 +64,23 @@ def naive():
     # PrintNode(original)
     step_idx = 0
     # print(TreeSize(original), TreeSize(mytree))
-    print(TreeSize(mytree))
+    # print(TreeSize(mytree))
     # write_to_csv([step_idx, TreeSize(original), TreeSize(mytree)], True)
-    write_to_csv([step_idx, TreeSize(mytree)], True)
+    # write_to_csv([step_idx, TreeSize(mytree)], True)
     while True:
         step_idx += 1
+        # print('#', end='')
         # actions = game.actions()
         # action = np.random.choice(actions)
-        mytree, action = Policy_Player_Naive(mytree)
+        # mytree, action = Policy_Player_Naive(mytree)
+        mytree, action = Policy_Player_Naive_Breadth_First(mytree)
         # PrintNode(original)
         # total_tree_size = TreeSize(original)
         current_tree_size = TreeSize(mytree)
         # print(total_tree_size, current_tree_size)
         print(current_tree_size)
         # write_to_csv([step_idx, total_tree_size, current_tree_size], False)
-        write_to_csv([step_idx, current_tree_size], False)
+        # write_to_csv([step_idx, current_tree_size], False)
         done, reward = game.step(action)
         total_reward += reward
         # print('#', end='')
@@ -87,13 +93,22 @@ def naive():
     # print(f'{total_reward}', end=' ')
     if game.won():
         print("WINNER!")
+    else:
+        print("LOSER!")
     rewards.append(total_reward)
     # print(str(state))
     print(max(rewards))
 
 def main(_):
+    start_time = time.time()
     naive()
+    duration = time.time() - start_time
+    print("naive:  %s seconds" % int(duration))
+
+    # start_time = time.time()
     # mcts()
+    # duration = time.time() - start_time
+    # print("mcts:   %s seconds" % (duration))
     
 if __name__ == "__main__":
     app.run(main)
